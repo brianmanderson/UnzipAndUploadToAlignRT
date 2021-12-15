@@ -117,6 +117,7 @@ namespace UnzipForAlignRT
                 }
                 if (move_on)
                 {
+                    Console.WriteLine("Taking too long, will come back and try again...");
                     continue;
                 }
                 string file_name = Path.GetFileName(zip_file);
@@ -141,10 +142,24 @@ namespace UnzipForAlignRT
             foreach (string file in all_files)
             {
                 FileInfo dcm_file_info = new FileInfo(file);
+                bool move_on = false;
+                int tries = 0;
+                Thread.Sleep(3000);
                 while (IsFileLocked(dcm_file_info))
                 {
                     Console.WriteLine("Waiting for file to be fully transferred...");
+                    tries += 1;
                     Thread.Sleep(3000);
+                    if (tries > 5)
+                    {
+                        move_on = true;
+                        break;
+                    }
+                }
+                if (move_on)
+                {
+                    Console.WriteLine("Taking too long, will come back and try again...");
+                    continue;
                 }
                 dicom_uploader.AddDicomFile(file);
                 File.Delete(file);
