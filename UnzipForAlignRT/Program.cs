@@ -2,6 +2,7 @@
 using System.Threading;
 using System.IO;
 using System.IO.Compression;
+using UnzipForAlignRT.Services;
 
 namespace UnzipForAlignRT
 {
@@ -45,7 +46,6 @@ namespace UnzipForAlignRT
     }
     class Program
     {
-        public bool folder_changed;
         static string[] file_paths = { @"\\ro-ariaimg-v\va_data$\ETHOS\AlignRT" };
         static bool IsFileLocked(FileInfo file)
         {
@@ -123,16 +123,25 @@ namespace UnzipForAlignRT
                 Thread.Sleep(3000);
             }
         }
-        static void CheckDownPath(string file_path)
+        static void UploadDicom(UploadDicomClass dicom_uploader, string dicom_directory)
         {
-            if (Directory.Exists(file_path))
+            string[] all_files = Directory.GetFiles(dicom_directory, "**.dcm", SearchOption.AllDirectories);
+            foreach (string file in all_files)
             {
-                UnzipFiles(file_path);
+                FileInfo dcm_file_info = new FileInfo(file);
+                while (IsFileLocked(dcm_file_info))
+                {
+                    Console.WriteLine("Waiting for file to be fully transferred...");
+                    Thread.Sleep(3000);
+                }
+                dicom_uploader.AddDicomFile(file);
+                File.Delete(file);
             }
         }
         static void Main(string[] args)
         {
             Console.WriteLine("Running...");
+            UploadDicomClass dicom_uploader = new UploadDicomClass();
             while (true)
             {
                 // First lets unzip the life images
@@ -141,7 +150,11 @@ namespace UnzipForAlignRT
                     Thread.Sleep(3000);
                     try
                     {
-                        CheckDownPath(file_path);
+                        if (Directory.Exists(file_path))
+                        {
+                            UnzipFiles(file_path);
+                            UploadDicom(dicom_uploader, Path.Join(file_path, "Finished"));
+                        }
                     }
                     catch
                     {
