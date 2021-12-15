@@ -2,8 +2,6 @@
 using System.Threading;
 using System.IO;
 using System.IO.Compression;
-using System.Collections.Generic;
-using FellowOakDicom;
 
 namespace UnzipForAlignRT
 {
@@ -100,7 +98,6 @@ namespace UnzipForAlignRT
         static void UnzipFiles(string zip_file_directory)
         {
             string[] all_files = Directory.GetFiles(zip_file_directory, "*.zip");
-            string overall_status;
             foreach (string zip_file in all_files)
             {
                 FileInfo zip_file_info = new FileInfo(zip_file);
