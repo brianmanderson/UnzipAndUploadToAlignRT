@@ -109,7 +109,7 @@ namespace UnzipForAlignRT
                     Console.WriteLine("Waiting for file to be fully transferred...");
                     tries += 1;
                     Thread.Sleep(3000);
-                    if (tries > 5)
+                    if (tries > 2)
                     {
                         move_on = true;
                         break;
